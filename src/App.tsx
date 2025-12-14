@@ -1,6 +1,12 @@
-import { useState, useEffect, ChangeEvent, KeyboardEvent } from 'react'
+import { useState, useEffect } from 'react'
 import './App.css'
+// Import our smaller components
+import Header from './components/Header'
+import NameInput from './components/NameInput'
+import Greeting from './components/Greeting'
 
+// App Component: The main component that coordinates everything
+// This is the "container" component - it manages state and passes data to child components
 function App() {
   // State management: These variables store the app's data and can trigger re-renders when changed
   const [name, setName] = useState<string>('') // Stores what the user types in the input field
@@ -40,6 +46,7 @@ function App() {
   }, [isTyping, displayName])
 
   // JSX return: This is what gets rendered on the screen
+  // Notice how we're using our custom components like HTML tags!
   return (
     <div className="app">
       {/* Background decoration: Animated visual element behind the content */}
@@ -47,44 +54,22 @@ function App() {
       
       {/* Main container: Wraps all the visible content */}
       <div className="container">
-        {/* Header section: Contains the title and welcome message */}
-        <div className="header">
-          <h1 className="title">
-            <span className="title-gradient">Welcome</span>
-            <span className="title-subtitle">to Vibe App</span>
-          </h1>
-        </div>
+        {/* Using the Header component - no props needed since it's just static content */}
+        <Header />
         
-        {/* Input section: Where users type their name and submit it */}
-        <div className="input-group">
-          {/* Text input: The field where users enter their name */}
-          <input
-            type="text"
-            placeholder="Enter your name"
-            value={name}
-            onChange={(e: ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
-            onKeyPress={(e: KeyboardEvent<HTMLInputElement>) => e.key === 'Enter' && handleGo()}
-            className="text-input"
-          />
-          {/* Submit button: Triggers the greeting when clicked */}
-          <button onClick={handleGo} className="go-button">
-            <span>Go</span>
-            <svg className="button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-            </svg>
-          </button>
-        </div>
+        {/* Using the NameInput component - passing data and functions as "props" */}
+        {/* Props are like function arguments, but for components */}
+        <NameInput 
+          name={name}                    // Pass the current name value
+          onNameChange={setName}         // Pass the function to update name
+          onGo={handleGo}                // Pass the function to handle "Go" click
+        />
         
-        {/* Display section: Shows the greeting message with typing animation (only appears after user submits) */}
-        {(displayName || typedText) && (
-          <div className="display-name">
-            <p className="typing-text">
-              {typedText}
-              {/* Cursor indicator: Shows a blinking cursor while typing animation is active */}
-              {isTyping && <span className="cursor">|</span>}
-            </p>
-          </div>
-        )}
+        {/* Using the Greeting component - passing the typing animation data */}
+        <Greeting 
+          typedText={typedText}          // Pass the text being typed
+          isTyping={isTyping}            // Pass whether typing is active
+        />
       </div>
     </div>
   )
