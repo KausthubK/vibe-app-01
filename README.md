@@ -12,6 +12,13 @@ A simple React web app where users can enter their name and see it displayed.
 
 ### Install Dependencies
 
+## System
+
+You'll need: npm (so install via nodejs website for Windows, or `sudo apt install npm`)
+
+## Project
+
+
 ```bash
 npm install
 ```
