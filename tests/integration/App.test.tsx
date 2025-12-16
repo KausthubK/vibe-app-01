@@ -3,6 +3,20 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import App from '@/App'
 
+// Helper function to use waitFor with fake timers
+// waitFor needs real timers to work, so we temporarily switch to real timers
+async function waitForWithFakeTimers(
+  callback: () => void | Promise<void>,
+  options?: { timeout?: number }
+) {
+  vi.useRealTimers()
+  try {
+    await waitFor(callback, options)
+  } finally {
+    vi.useFakeTimers()
+  }
+}
+
 // Mock timers for testing the typing animation
 describe('App Integration', () => {
   beforeEach(() => {
@@ -50,7 +64,8 @@ describe('App Integration', () => {
     await user.click(button)
 
     // Wait for typing animation to start
-    await waitFor(() => {
+    // Use real timers temporarily for waitFor to work
+    await waitForWithFakeTimers(() => {
       expect(screen.getByText(/Hello/i)).toBeInTheDocument()
     }, { timeout: 1000 })
   })
@@ -63,7 +78,8 @@ describe('App Integration', () => {
     await user.type(input, 'Charlie{Enter}')
 
     // Wait for typing animation to start
-    await waitFor(() => {
+    // Use real timers temporarily for waitFor to work
+    await waitForWithFakeTimers(() => {
       expect(screen.getByText(/Hello/i)).toBeInTheDocument()
     }, { timeout: 1000 })
   })
@@ -79,7 +95,8 @@ describe('App Integration', () => {
     await user.click(button)
 
     // Check that cursor appears (isTyping is true)
-    await waitFor(() => {
+    // Use real timers temporarily for waitFor to work
+    await waitForWithFakeTimers(() => {
       expect(screen.getByText('|')).toBeInTheDocument()
     }, { timeout: 1000 })
 
@@ -87,17 +104,19 @@ describe('App Integration', () => {
     const fullText = 'Hello, David!'
     for (let i = 0; i < fullText.length; i++) {
       vi.advanceTimersByTime(50)
-      await waitFor(() => {
+      // After advancing timers, we can check immediately since React state updates synchronously
+      // But we still need to wait for the DOM to update, so use real timers briefly
+      await waitForWithFakeTimers(() => {
         const text = screen.getByText(new RegExp(fullText.slice(0, i + 1).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')))
         expect(text).toBeInTheDocument()
-      })
+      }, { timeout: 100 })
     }
 
     // After animation completes, cursor should disappear
     vi.advanceTimersByTime(50)
-    await waitFor(() => {
+    await waitForWithFakeTimers(() => {
       expect(screen.queryByText('|')).not.toBeInTheDocument()
-    })
+    }, { timeout: 100 })
   })
 
   it('empty name does not trigger greeting', async () => {
@@ -129,7 +148,8 @@ describe('App Integration', () => {
     expect(input).toHaveValue('Eve')
 
     // Greeting should appear
-    await waitFor(() => {
+    // Use real timers temporarily for waitFor to work
+    await waitForWithFakeTimers(() => {
       expect(screen.getByText(/Hello/i)).toBeInTheDocument()
     }, { timeout: 1000 })
 
@@ -139,7 +159,8 @@ describe('App Integration', () => {
     await user.click(button)
 
     // New greeting should appear
-    await waitFor(() => {
+    // Use real timers temporarily for waitFor to work
+    await waitForWithFakeTimers(() => {
       expect(screen.getByText(/Hello, Frank!/i)).toBeInTheDocument()
     }, { timeout: 2000 })
   })
